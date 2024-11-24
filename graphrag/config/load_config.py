@@ -5,14 +5,17 @@
 
 from pathlib import Path
 
-from .config_file_loader import load_config_from_file, search_for_config_in_root_dir
-from .create_graphrag_config import create_graphrag_config
-from .models.graph_rag_config import GraphRagConfig
+from graphrag.config.config_file_loader import (
+    load_config_from_file,
+    search_for_config_in_root_dir,
+)
+from graphrag.config.create_graphrag_config import create_graphrag_config
+from graphrag.config.models.graph_rag_config import GraphRagConfig
 
 
 def load_config(
-    root_dir: str | Path,
-    config_filepath: str | None = None,
+    root_dir: Path,
+    config_filepath: Path | None = None,
 ) -> GraphRagConfig:
     """Load configuration from a file or create a default configuration.
 
@@ -27,11 +30,11 @@ def load_config(
         If None, searches for config file in root and
         if not found creates a default configuration.
     """
-    root = Path(root_dir).resolve()
+    root = root_dir.resolve()
 
     # If user specified a config file path then it is required
     if config_filepath:
-        config_path = Path(config_filepath).resolve()
+        config_path = config_filepath.resolve()
         if not config_path.exists():
             msg = f"Specified Config file not found: {config_path}"
             raise FileNotFoundError(msg)

@@ -8,7 +8,7 @@ from abc import ABCMeta, abstractmethod
 from collections.abc import Iterator
 from typing import Any
 
-from graphrag.logging import ProgressReporter
+from graphrag.logging.base import ProgressReporter
 
 
 class PipelineStorage(metaclass=ABCMeta):
@@ -76,3 +76,7 @@ class PipelineStorage(metaclass=ABCMeta):
     @abstractmethod
     def child(self, name: str | None) -> "PipelineStorage":
         """Create a child storage instance."""
+
+    @abstractmethod
+    def keys(self) -> list[str]:
+        """List all keys in the storage."""

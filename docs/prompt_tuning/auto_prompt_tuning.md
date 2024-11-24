@@ -13,16 +13,16 @@ Figure 1: Auto Tuning Conceptual Diagram.
 
 ## Prerequisites
 
-Before running auto tuning make sure you have already initialized your workspace with the `graphrag.index --init` command. This will create the necessary configuration files and the default prompts. Refer to the [Init Documentation](../config/init.md) for more information about the initialization process.
+Before running auto tuning, ensure you have already initialized your workspace with the `graphrag init` command. This will create the necessary configuration files and the default prompts. Refer to the [Init Documentation](../config/init.md) for more information about the initialization process.
 
 ## Usage
 
 You can run the main script from the command line with various options:
 
 ```bash
-python -m graphrag.prompt_tune [--root ROOT] [--domain DOMAIN]  [--method METHOD] [--limit LIMIT] [--language LANGUAGE] \
+graphrag prompt-tune [--root ROOT] [--config CONFIG] [--domain DOMAIN]  [--selection-method METHOD] [--limit LIMIT] [--language LANGUAGE] \
 [--max-tokens MAX_TOKENS] [--chunk-size CHUNK_SIZE] [--n-subset-max N_SUBSET_MAX] [--k K] \
-[--min-examples-required MIN_EXAMPLES_REQUIRED] [--no-entity-types] [--output OUTPUT]
+[--min-examples-required MIN_EXAMPLES_REQUIRED] [--discover-entity-types] [--output OUTPUT]
 ```
 
 ## Command-Line Options
@@ -49,14 +49,14 @@ python -m graphrag.prompt_tune [--root ROOT] [--domain DOMAIN]  [--method METHOD
 
 - `--min-examples-required` (optional): The minimum number of examples required for entity extraction prompts. Default is 2.
 
-- `--no-entity-types` (optional): Use untyped entity extraction generation. We recommend using this when your data covers a lot of topics or it is highly randomized.
+- `--discover-entity-types` (optional): Allow the LLM to discover and extract entities automatically. We recommend using this when your data covers a lot of topics or it is highly randomized.
 
 - `--output` (optional): The folder to save the generated prompts. Default is "prompts".
 
 ## Example Usage
 
 ```bash
-python -m graphrag.prompt_tune --root /path/to/project --config /path/to/settings.yaml --domain "environmental news" \
+python -m graphrag prompt-tune --root /path/to/project --config /path/to/settings.yaml --domain "environmental news" \
 --method random --limit 10 --language English --max-tokens 2048 --chunk-size 256 --min-examples-required 3 \
 --no-entity-types --output /path/to/output
 ```
@@ -64,7 +64,7 @@ python -m graphrag.prompt_tune --root /path/to/project --config /path/to/setting
 or, with minimal configuration (suggested):
 
 ```bash
-python -m graphrag.prompt_tune --root /path/to/project --config /path/to/settings.yaml --no-entity-types
+python -m graphrag prompt-tune --root /path/to/project --config /path/to/settings.yaml --no-entity-types
 ```
 
 ## Document Selection Methods

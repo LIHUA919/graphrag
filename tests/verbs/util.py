@@ -7,13 +7,11 @@ import pandas as pd
 from datashaper import Workflow
 from pandas.testing import assert_series_equal
 
-from graphrag.config import create_graphrag_config
-from graphrag.index import (
-    PipelineWorkflowConfig,
-    create_pipeline_config,
-)
-from graphrag.index.run.utils import _create_run_context
-from graphrag.index.storage.pipeline_storage import PipelineStorage
+from graphrag.config.create_graphrag_config import create_graphrag_config
+from graphrag.index.config.workflow import PipelineWorkflowConfig
+from graphrag.index.context import PipelineRunContext
+from graphrag.index.create_pipeline_config import create_pipeline_config
+from graphrag.index.run.utils import create_run_context
 
 pd.set_option("display.max_columns", None)
 
@@ -23,12 +21,8 @@ def load_input_tables(inputs: list[str]) -> dict[str, pd.DataFrame]:
     # stick all the inputs in a map - Workflow looks them up by name
     input_tables: dict[str, pd.DataFrame] = {}
 
-    # all workflows implicitly receive the `input` source, which is formatted as a dataframe after loading from storage
-    # we'll simulate that by just loading one of our output parquets and converting back to equivalent dataframe
-    # so we aren't dealing with storage vagaries (which would become an integration test)
-    source = pd.read_parquet("tests/verbs/data/create_final_documents.parquet")
-    source.rename(columns={"raw_content": "text"}, inplace=True)
-    input_tables["source"] = cast(pd.DataFrame, source[["id", "text", "title"]])
+    source = pd.read_parquet("tests/verbs/data/source_documents.parquet")
+    input_tables["source"] = source
 
     for input in inputs:
         # remove the workflow: prefix if it exists, because that is not part of the actual table filename
@@ -60,7 +54,7 @@ def get_config_for_workflow(name: str) -> PipelineWorkflowConfig:
 async def get_workflow_output(
     input_tables: dict[str, pd.DataFrame],
     schema: dict,
-    storage: PipelineStorage | None = None,
+    context: PipelineRunContext | None = None,
 ) -> pd.DataFrame:
     """Pass in the input tables, the schema, and the output name"""
 
@@ -70,9 +64,9 @@ async def get_workflow_output(
         input_tables=input_tables,
     )
 
-    context = _create_run_context(storage, None, None)
+    run_context = context or create_run_context(None, None, None)
 
-    await workflow.run(context=context)
+    await workflow.run(context=run_context)
 
     # if there's only one output, it is the default here, no name required
     return cast(pd.DataFrame, workflow.output())
@@ -82,7 +76,8 @@ def compare_outputs(
     actual: pd.DataFrame, expected: pd.DataFrame, columns: list[str] | None = None
 ) -> None:
     """Compare the actual and expected dataframes, optionally specifying columns to compare.
-    This uses assert_series_equal since we are sometimes intentionally omitting columns from the actual output."""
+    This uses assert_series_equal since we are sometimes intentionally omitting columns from the actual output.
+    """
     cols = expected.columns if columns is None else columns
 
     assert len(actual) == len(
